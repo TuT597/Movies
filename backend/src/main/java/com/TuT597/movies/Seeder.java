@@ -19,9 +19,9 @@ public class Seeder implements CommandLineRunner {
     public void run(String...args) throws Exception {
         if (movieRepository.count() == 0){
             var seedMovies = List.of(
-                    new Movie("Up", 5),
-                    new Movie("Citizen Kane", 2),
-                    new Movie("The Grand Budapest Hotel", 3)
+                    new Movie("Up"),
+                    new Movie("Citizen Kane"),
+                    new Movie("The Grand Budapest Hotel")
                     );
             for (Movie movie: seedMovies) movieRepository.save(movie);
         }

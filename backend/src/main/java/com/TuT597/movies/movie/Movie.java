@@ -1,8 +1,12 @@
 package com.TuT597.movies.movie;
 
+import com.TuT597.movies.review.Review;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Movie {
@@ -10,14 +14,17 @@ public class Movie {
     @GeneratedValue
     private Long id;
     private String title;
-    private int rating;
+
+    Movie() {}
+
+    public Movie(String title) {
+        this.title = title;
+    }
+
+    private Set<Review> reviews = new HashSet<>();
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getTitle() {
@@ -28,18 +35,7 @@ public class Movie {
         this.title = title;
     }
 
-    public int getRating() {
-        return rating;
-    }
-
-    public void setRating(int rating) {
-        this.rating = rating;
-    }
-
-    Movie(){}
-
-    Movie(String title, int rating){
-        this.title = title;
-        this.rating = rating;
+    public void setId(long id) {
+        this.id = id;
     }
 }
