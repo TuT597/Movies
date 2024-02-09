@@ -1,4 +1,4 @@
-package com.TuT597.movies;
+package com.TuT597.movies.movie;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +14,10 @@ public class Movie {
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getTitle() {

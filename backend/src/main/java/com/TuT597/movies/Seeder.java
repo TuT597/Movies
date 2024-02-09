@@ -1,5 +1,7 @@
 package com.TuT597.movies;
 
+import com.TuT597.movies.movie.Movie;
+import com.TuT597.movies.movie.MovieRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
