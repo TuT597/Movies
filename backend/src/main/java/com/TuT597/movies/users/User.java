@@ -1,4 +1,4 @@
-package com.TuT597.movies.user;
+package com.TuT597.movies.users;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,16 +7,27 @@ import jakarta.persistence.Id;
 
 import java.util.UUID;
 
-@Entity
+@Entity(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
     private String username;
 
-    User(){}
+    private String password;
 
-    public User(String username) {
+    private boolean enabled;
+
+    User() {}
+
+    public User(String username, String password) {
         this.username = username;
+        this.password = password;
+        enabled = true;
+    }
+
+    public String getUsername() {
+        return username;
     }
 }

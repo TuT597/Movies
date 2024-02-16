@@ -1,4 +1,4 @@
-package com.TuT597.movies.review;
+package com.TuT597.movies.reviews;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

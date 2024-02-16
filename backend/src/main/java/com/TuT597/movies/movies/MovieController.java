@@ -1,6 +1,7 @@
-package com.TuT597.movies.movie;
+package com.TuT597.movies.movies;
 
-import com.TuT597.movies.exceptions.InconsistentIdException;
+import com.TuT597.movies.exceptions.BadInputException;
+import com.TuT597.movies.reviews.ReviewDto;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 
 @RestController
+@RequestMapping("movies")
 public class MovieController {
     private final MovieRepository movieRepository;
 
@@ -23,31 +25,43 @@ public class MovieController {
         this.movieRepository = movieRepository;
     }
 
-    @GetMapping("findall")
-    public Iterable<Movie> getAll(Pageable pageable) {
-        return movieRepository.findAll(PageRequest.of(
-                pageable.getPageNumber(),
-                Math.min(pageable.getPageSize(), 5),
-                pageable.getSortOr(Sort.by(Sort.Direction.DESC, "rating"))
-        ));
+    @GetMapping
+    public Iterable<MovieDto> getAll(Pageable pageable) {
+        return movieRepository.findAll(
+                        PageRequest.of(
+                                pageable.getPageNumber(),
+                                Math.min(pageable.getPageSize(), 3),
+                                pageable.getSortOr(Sort.by("title"))))
+                .map(MovieDto::convertToDto);
     }
 
-    @GetMapping("find/{id}")
-    public ResponseEntity<Movie> getById(@PathVariable long id) {
+    @GetMapping("search/id/{id}")
+    public ResponseEntity<?> getById(@PathVariable long id) {
         Optional<Movie> possibleMovie = movieRepository.findById(id);
-        return possibleMovie.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if (possibleMovie.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(new MovieDto(possibleMovie.get()));
     }
 
-    @GetMapping("search/titles/{title}")
-    public ResponseEntity<Iterable<Movie>> findByTitle(@PathVariable String title) {
-        List<Movie> movies = movieRepository.findByTitleIgnoringCaseContaining(title);
-        return ResponseEntity.ok(movies);
+    @GetMapping("search/titles/{query}")
+    public ResponseEntity<Iterable<MovieDto>> findTitlesContaining(@PathVariable String query) {
+        List<MovieDto> movieDtos = movieRepository.findByTitleIgnoringCaseContaining(query)
+                .stream()
+                .map(MovieDto::new)
+                .toList();
+        return ResponseEntity.ok(movieDtos);
     }
 
-    @GetMapping("search/rating/{rating}")
-    public ResponseEntity<Iterable<Movie>> findByRating(@PathVariable int rating){
-        List<Movie> movies = movieRepository.findByRating(rating);
-        return ResponseEntity.ok(movies);
+    @GetMapping("search/reviews/{id}")
+    public ResponseEntity<List<ReviewDto>> getReviews(@PathVariable long id) {
+        Optional<Movie> possibleMovie = movieRepository.findById(id);
+        if (possibleMovie.isEmpty()) return ResponseEntity.notFound().build();
+        var movie = possibleMovie.get();
+        var movieReviews = movie.getReviews();
+        return ResponseEntity.ok(movieReviews
+                .stream()
+                .map(ReviewDto::new)
+                .toList()
+        );
     }
 
     @PostMapping("add")
@@ -67,12 +81,7 @@ public class MovieController {
 
     @PutMapping("update/{id}")
     public ResponseEntity<?> replace(@RequestBody Movie movie, @PathVariable long id) {
-        var idFromBody = movie.getId();
-        if (idFromBody != null && idFromBody != id) {
-            var problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                    "ids given by path and body are inconsistent, and the id of an item should not be changed");
-            return ResponseEntity.badRequest().body(problemDetail);
-        }
+        checkBodyId(movie, id);
         var possibleOriginalMovie = movieRepository.findById(id);
         if (possibleOriginalMovie.isEmpty()) return ResponseEntity.notFound().build();
         movie.setId(id);
@@ -82,17 +91,22 @@ public class MovieController {
 
     @PatchMapping("patch/{id}")
     public ResponseEntity<?> patch(@RequestBody Movie changedMovie, @PathVariable long id) {
-        var idFromBody = changedMovie.getId();
-        if (idFromBody != null && idFromBody != id) throw new InconsistentIdException();
+        checkBodyId(changedMovie, id);
         var possibleOriginalMovie = movieRepository.findById(id);
         if (possibleOriginalMovie.isEmpty()) return ResponseEntity.notFound().build();
 
         var movie = possibleOriginalMovie.get();
         var newTitle = changedMovie.getTitle();
-        if (newTitle!= null) movie.setTitle(newTitle);
+        if (newTitle != null) movie.setTitle(newTitle);
 
         movieRepository.save(movie);
         return ResponseEntity.ok(movie);
+    }
+
+    private static void checkBodyId(Movie movie, long id) {
+        var idFromBody = movie.getId();
+        if (idFromBody != null && idFromBody != id)
+            throw new BadInputException("ids given by path and body are inconsistent, and the id of an item should not be changed");
     }
 
     @DeleteMapping("delete/{id}")

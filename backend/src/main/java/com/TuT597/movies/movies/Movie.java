@@ -1,9 +1,11 @@
-package com.TuT597.movies.movie;
+package com.TuT597.movies.movies;
 
-import com.TuT597.movies.review.Review;
+import com.TuT597.movies.reviews.Review;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,6 +15,7 @@ public class Movie {
     @Id
     @GeneratedValue
     private Long id;
+
     private String title;
 
     Movie() {}
@@ -21,6 +24,8 @@ public class Movie {
         this.title = title;
     }
 
+    @JsonManagedReference
+    @OneToMany(mappedBy = "movie")
     private Set<Review> reviews = new HashSet<>();
 
     public Long getId() {
@@ -31,11 +36,15 @@ public class Movie {
         return title;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public Set<Review> getReviews() {
+        return reviews;
     }
 }
