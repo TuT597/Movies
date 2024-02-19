@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Getter;
 
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Getter
     private String username;
 
     private String password;
@@ -27,7 +29,4 @@ public class User {
         enabled = true;
     }
 
-    public String getUsername() {
-        return username;
-    }
 }

@@ -1,4 +1,4 @@
-package com.TuT597.movies.users.authorities;
+package com.TuT597.movies.authorities;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
